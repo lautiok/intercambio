@@ -1,0 +1,8 @@
+:root {
+    --color-background: #fff;
+}
+
+body {
+    background-color: var(--color-background);
+    font-family: var(--font-poppins);
+}

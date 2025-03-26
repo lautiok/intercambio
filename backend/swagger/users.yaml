@@ -1,0 +1,113 @@
+openapi: 3.0.0
+info:
+  title: User Management API
+  description: API para la gestión de usuarios, accesible solo para administradores.
+  version: 1.0.0
+paths:
+  /api/v1/users:
+    get:
+      summary: Obtener todos los usuarios
+      tags:
+        - Users
+      description: Devuelve una lista de todos los usuarios. Solo accesible para administradores.
+      security:
+        - BearerAuth: []
+      responses:
+        '200':
+          description: Lista de usuarios obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/User'
+        '500':
+          description: Error del servidor
+
+  /api/v1/users/{id}:
+    get:
+      summary: Obtener un usuario por ID
+      tags:
+        - Users
+      description: Devuelve los detalles de un usuario específico.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Usuario obtenido con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/User'
+        '500':
+          description: Error del servidor
+
+    put:
+      summary: Actualizar un usuario
+      tags:
+        - Users
+      description: Actualiza la información de un usuario específico.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/User'
+      responses:
+        '200':
+          description: Usuario actualizado con éxito
+        '500':
+          description: Error del servidor
+
+    delete:
+      summary: Eliminar un usuario
+      tags:
+        - Users
+      description: Elimina un usuario específico.
+      security:
+        - BearerAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Usuario eliminado con éxito
+        '500':
+          description: Error del servidor
+
+components:
+  securitySchemes:
+    BearerAuth:
+      type: http
+      scheme: bearer
+  schemas:
+    User:
+      type: object
+      properties:
+        id:
+          type: string
+        name:
+          type: string
+        email:
+          type: string
+        role:
+          type: string
+        institutional:
+          type: string

@@ -1,0 +1,134 @@
+openapi: 3.0.0
+info:
+  title: Institucional API
+  version: 1.0.0
+tags:
+  - name: Institucional
+paths:
+  /api/v1/institucional:
+    get:
+      summary: Obtener todas las instituciones
+      tags:
+        - Institucional
+      responses:
+        '200':
+          description: Lista de instituciones
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Institucional'
+    post:
+      summary: Crear una nueva institución
+      tags:
+        - Institucional
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Institucional'
+      responses:
+        '201':
+          description: Institución creada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institucional'
+
+  /api/v1/institucional/{id}:
+    get:
+      summary: Obtener una institución por ID
+      tags:
+        - Institucional
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Institución encontrada
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institucional'
+    put:
+      summary: Actualizar una institución por ID
+      tags:
+        - Institucional
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/Institucional'
+      responses:
+        '200':
+          description: Institución actualizada exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Institucional'
+    delete:
+      summary: Eliminar una institución por ID
+      tags:
+        - Institucional
+      parameters:
+        - name: id
+          in: path
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Institución eliminada exitosamente
+
+components:
+  schemas:
+    Institucional:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del institucional
+        institucion:
+          type: string
+          description: Nombre de la institución
+        direccion:
+          type: string
+          description: Dirección de la institución
+        email:
+          type: string
+          format: email
+          description: Correo electrónico de la institución
+        telefono:
+          type: string
+          description: Número de teléfono de la institución
+        pais:
+          type: string
+          description: País de la institución
+      required:
+        - institucion
+        - direccion
+        - email
+        - telefono
+        - pais
+
+examples:
+  InstitucionalExample:
+    value:
+      _id: "60c72b2f9b1e8e001f8f2b58"
+      institucion: "Universidad de la Vida"
+      direccion: "Av. Siempre Viva 123"
+      email: "contacto@universidadvida.com"
+      telefono: "+1234567890"
+      pais: "Argentina"
