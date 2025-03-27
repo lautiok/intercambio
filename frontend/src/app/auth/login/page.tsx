@@ -16,6 +16,7 @@ export default function Page() {
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
 
+
   useEffect(() => {
     if (isCheckingAuth) {
       router.push("/intercambio");

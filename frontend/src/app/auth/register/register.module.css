@@ -29,6 +29,23 @@
     outline: none;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
   }
+
+  .form select {
+    padding: 0.8rem;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    font-size: 1rem;
+    background: white;
+    width: 100%;
+    appearance: auto;
+    cursor: pointer;
+  }
+  
+  .form select:focus {
+    border-color: #000000;
+    outline: none;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.5);
+  }
   
     .form  .buttonSubmit {
     background: #000000;

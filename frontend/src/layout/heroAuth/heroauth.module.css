@@ -1,6 +1,6 @@
 .heroauth {
     background-color: #fff;
-    padding: 2rem 0;
+    padding: 1rem 0;
     text-align: center;
     position: relative;
 }
@@ -14,7 +14,7 @@
 }
 
 .heroauth__container img {
-    width: 300px;
+    width: 250px;
     height: auto;
 }
 

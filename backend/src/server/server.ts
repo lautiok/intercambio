@@ -23,7 +23,7 @@ app.use(cors(
 ));
 
 app.use("/api/v1/users", ckeckSession, checkRole("admin") , UsersRoutes);
-app.use("/api/v1/institucional", ckeckSession, checkRole("admin") , InstitutionalRoutes);
+app.use("/api/v1/institucional" , InstitutionalRoutes);
 app.use("/api/v1/documents", swaggerUI.serve, swaggerUI.setup(specs)) 
 app.use("/api/v1/auth", AuthRoutes); 
 
