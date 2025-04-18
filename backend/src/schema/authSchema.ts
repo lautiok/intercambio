@@ -25,4 +25,21 @@ export const loginSchema = z.object({
     password: z.string().min(6, {
         message: "La contraseña debe tener al menos 6 caracteres",
     }),
+    
+});
+
+export const forgetPasswordSchema = z.object({
+    email: z.string().email({
+        message: "El email debe ser válido",
+    }),
+});
+
+export const resetPasswordSchema = z.object({
+    token: z.string(),
+    newPassword: z.string().min(6, {
+        message: "La contraseña debe tener al menos 6 caracteres",
+    }),
+    password_dos: z.string().min(6, {
+        message: "La contraseña debe tener al menos 6 caracteres",
+    }),
 });

@@ -31,3 +31,15 @@ export const verifyRequest = async () => {
   );
   return response.data;
 };
+
+export const forgotPasswordRequest = async (email: string) => {
+  const response = await axios.post("auth/forgot-password", {
+    email,
+  });
+  return response.data;
+};
+
+export const resetPasswordRequest = async (data: any) => {
+  const response = await axios.post("auth/reset-password", data);
+  return response.data;
+};

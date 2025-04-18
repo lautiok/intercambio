@@ -16,6 +16,7 @@ export default function Page() {
   const { getInstitucional, institucional } = useInstitucional();
   const router = useRouter();
   const [showPassword, setShowPassword] = useState(false);
+  const [showPasswordDos, setShowPasswordDos] = useState(false);
   const [selectedInstitucional, setSelectedInstitucional] = useState<
     string | undefined
   >(undefined);
@@ -103,7 +104,7 @@ export default function Page() {
         <label htmlFor="password_dos">Repetir contraseña</label>
         <div className={styles.passwordContainer}>
           <input
-            type={showPassword ? "text" : "password"}
+            type={showPasswordDos ? "text" : "password"}
             id="password_dos"
             placeholder="Repite tu contraseña"
             {...register("password_dos")}
@@ -111,9 +112,9 @@ export default function Page() {
           <button
             type="button"
             className={styles.togglePassword}
-            onClick={() => setShowPassword(!showPassword)}
+            onClick={() => setShowPasswordDos(!showPasswordDos)}
           >
-            {showPassword ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
+            {showPasswordDos ? <EyeOffIcon size={20} /> : <EyeIcon size={20} />}
           </button>
         </div>
         <button

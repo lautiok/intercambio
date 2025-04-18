@@ -29,4 +29,11 @@ export class UserService implements IUserService {
     async findUserByEmail(email: string): Promise<User | null> {
         return this.userRepository.findByEmail(email);
     }
+    async saveResetToken(userId: string, token: string) {
+        await this.userRepository.update(userId, { resetToken: token });
+      }
+
+      async updatePassword(userId: string, newPassword: string) {
+        await this.userRepository.update(userId, { password: newPassword, resetToken: null });
+      }
 }

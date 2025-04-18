@@ -12,6 +12,7 @@ export interface User {
 
 export interface IUserRepository extends Repository<User> {
     findByEmail: (email: string) => Promise<User | null>;
+    update: (userId: string, updateData: object) => Promise<User | null>;
 }
 
 export interface IUserService {

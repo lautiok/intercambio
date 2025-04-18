@@ -1,6 +1,6 @@
 "use client";
 
-import { loginRequest, logoutRequest, registerRequest, verifyRequest } from "@/api/authApi";
+import { forgotPasswordRequest, loginRequest, logoutRequest, registerRequest, resetPasswordRequest, verifyRequest } from "@/api/authApi";
 import { ReactNode, createContext, useContext, useState, useEffect } from "react";
 import axios from "axios";
 
@@ -39,6 +39,8 @@ export const AuthContext = createContext<{
     login: (email: string, password: string) => Promise<boolean>;
     register: (user: NewUser) => Promise<RegisterResponse>;
     logout: () => void;
+    forgetPassword: (email: string) => Promise<boolean>;
+    resetPassword: (token: string, password: string, password_dos: string) => Promise<boolean>;
     user: LoginResponse | null;
     setUser: (user: LoginResponse | null) => void;
     loading: boolean;
@@ -48,6 +50,8 @@ export const AuthContext = createContext<{
     login: () => Promise.resolve(false),
     register: () => Promise.reject(new Error("Context not initialized")),
     logout: () => {},
+    forgetPassword: () => Promise.resolve(false),
+    resetPassword: () => Promise.resolve(false),
     user: null,
     setUser: () => {},
     loading: false,
@@ -154,6 +158,49 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
         }
     };
 
+    const forgetPassword = async (email: string): Promise<boolean> => {
+        try {
+            setLoading(true);
+            setError(null); 
+            await forgotPasswordRequest(email);
+            return true;
+        } catch (error) {
+            let errorMessage = "An unknown error occurred";
+            if (axios.isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || "Forgot password failed";
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setTimedError(errorMessage);
+            console.error("Forgot password error:", error);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+     const resetPassword = async (token: string, password: string, password_dos: string): Promise<boolean> => {
+        try {
+            setLoading(true);
+            setError(null); 
+            await resetPasswordRequest({ token, newPassword: password, password_dos });
+            return true;
+        } catch (error) {
+            let errorMessage = "An unknown error occurred";
+            if (axios.isAxiosError(error)) {
+                errorMessage = error.response?.data?.message || "Reset password failed";
+            } else if (error instanceof Error) {
+                errorMessage = error.message;
+            }
+            setTimedError(errorMessage);
+            console.error("Reset password error:", error);
+            return false;
+        } finally {
+            setLoading(false);
+        }
+    }
+
+
     return (
         <AuthContext.Provider value={{ 
             login,
@@ -163,6 +210,8 @@ export const AuthProvider = ({ children }: { children: ReactNode }) => {
             loading, 
             error, 
             logout,
+            forgetPassword,
+            resetPassword,
             isCheckingAuth,
         }}>
             {children}

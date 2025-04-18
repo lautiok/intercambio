@@ -10,5 +10,8 @@ export const config = {
   jwtSecret: process.env.JWT_SECRET || "secret",
   block_time: process.env.BLOCK_TIME || 60000,
   url: process.env.URL || "http://localhost:3000",
-
+  nodemailer: {
+    user : process.env.nodemiler_user,
+    password : process.env.nodemailer_password,
+  }
 };

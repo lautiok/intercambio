@@ -13,6 +13,9 @@ import {
   clearLoginAttempts,
   increaseLoginAttempts,
 } from "../utils/loginAttempts";
+import nodemailer from "nodemailer";
+import { transporter } from "../config/nodemailer";
+
 
 const userRepository: IUserRepository = new UserRepository();
 const userService = new UserService(userRepository);
@@ -139,6 +142,94 @@ export const verifyAuth = async (req: Request, res: Response): Promise<any> => {
     }
   } catch (error) {
     return res.status(401).json({ message: "Unauthorized" });
+  }
+};
+
+export const forgotPasswordAuth = async (req: Request, res: Response): Promise<any> => {
+  const { email } = req.body;
+
+  if (!email) {
+    return res.status(400).json({ message: "Ingrese un correo válido" });
+  }
+
+  try {
+    const user = await userService.findUserByEmail(email);
+    if (!user) {
+      return res.status(400).json({ message: "El usuario no existe" });
+    }
+
+    const resetToken = jwt.sign({ email: user.email }, config.jwtSecret, {
+      expiresIn: "1h",
+    });
+
+    if (!user._id) {
+      return res.status(500).json({ message: "no se detecto ningun usuario" });
+    }
+    
+    await userService.saveResetToken(user._id, resetToken);
+
+    const mailOptions = {
+      from: config.nodemailer.user,
+      to: email,
+      subject: "Recuperación de contraseña",
+      html: `
+        <div style="font-family: Arial, sans-serif; max-width: 500px; margin: auto; padding: 20px; border: 1px solid #ddd; border-radius: 10px; text-align: center;">
+          <img src="https://static.vecteezy.com/system/resources/previews/023/450/725/large_2x/brown-book-illustration-free-png.png" alt="Logo" style="width: 80px; margin-bottom: 10px;">
+          <h2 style="color: #333;">Recuperación de contraseña</h2>
+          <p style="color: #555;">Hola, <strong>${user.name}</strong></p>
+          <p style="color: #555;">Haz clic en el siguiente botón para restablecer tu contraseña:</p>
+          <a href="${config.url}/auth/reset-password/${resetToken}" 
+             style="display: inline-block; padding: 10px 20px; color: #fff; background-color: #000; text-decoration: none; border-radius: 5px; margin: 10px 0;">
+            Restablecer contraseña
+          </a>
+          <p style="color: #999; font-size: 12px;">Este enlace expirará en 1 hora.</p>
+          <hr style="border: 0; border-top: 1px solid #ddd;">
+          <p style="color: #777; font-size: 12px;">Si no solicitaste este cambio, ignora este mensaje.</p>
+        </div>
+      `,
+    };
+
+    await transporter.sendMail(mailOptions);
+
+    return res.status(200).json({ message: "Correo de recuperación enviado" });
+  } catch (error) {
+    console.log(error);
+    return res.status(500).json({ message: "Error en el servidor" });
+  }
+};
+
+export const resetPasswordAuth = async (req: Request, res: Response):Promise<any> => {
+  const { token, newPassword, password_dos } = req.body;
+
+  if (!token || !newPassword || !password_dos) {
+    return res.status(400).json({ message: "Token y nueva contraseña requeridos" });
+  }
+
+  if (newPassword !== password_dos) {
+    return res.status(400).json({ message: "Las contraseñas no coinciden" });
+  }
+
+  try {
+    const decoded = jwt.verify(token, config.jwtSecret);
+    if (typeof decoded !== "string" && "email" in decoded) {
+      const user = await userService.findUserByEmail(decoded.email);
+      if (!user) {
+        return res.status(400).json({ message: "Token inválido" });
+      }
+
+      if (!user._id) {
+        return res.status(500).json({ message: "el usuario no existe" });
+      }
+
+      const hashedPassword = await bcrypt.hash(newPassword, Number(config.hashSalt));
+      await userService.updatePassword(user._id, hashedPassword);
+
+      return res.status(200).json({ message: "Contraseña restablecida correctamente" });
+    } else {
+      return res.status(400).json({ message: "Token inválido" });
+    }
+  } catch (error) {
+    return res.status(400).json({ message: "Token expirado o inválido" });
   }
 };
 
