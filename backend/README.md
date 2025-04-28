@@ -2,7 +2,7 @@
 
 ## Descripción
 
-Backend del proyecto Intercambia desarrollado con Express y TypeScript. Proporciona una API RESTful para la gestión de usuarios, autenticación, y las funcionalidades principales de la plataforma.
+Backend del proyecto Intercambia desarrollado con Express y TypeScript. Proporciona una API RESTful para la gestión de usuarios, libros, intercambios y todas las funcionalidades principales de la plataforma de intercambio de libros para instituciones educativas.
 
 ## Tecnologías
 
@@ -14,6 +14,7 @@ Backend del proyecto Intercambia desarrollado con Express y TypeScript. Proporci
 - **Zod**: Validación de datos.
 - **Nodemailer**: Envío de correos electrónicos.
 - **Swagger**: Documentación API.
+- **Multer**: Gestión de carga de archivos (imágenes de libros).
 
 ## Estructura del Proyecto
 
@@ -23,8 +24,16 @@ backend/
 │   ├── app.ts                  # Punto de entrada de la aplicación
 │   ├── config/                 # Configuraciones (MongoDB, nodemailer, etc.)
 │   ├── controllers/            # Controladores para las rutas
+│   │   ├── auth.controllers.ts # Controladores de autenticación
+│   │   ├── books.controllers.ts # Controladores de libros
+│   │   ├── institucional.controllers.ts # Controladores de instituciones
+│   │   └── users.controllers.ts # Controladores de usuarios
 │   ├── middleware/             # Middleware personalizado
 │   ├── models/                 # Modelos de Mongoose
+│   │   ├── books.models.ts     # Modelo de libros
+│   │   ├── institucional.models.ts # Modelo de instituciones
+│   │   ├── login.models.ts     # Modelo de registros de login
+│   │   └── users.models.ts     # Modelo de usuarios
 │   ├── repositories/           # Acceso a datos
 │   ├── routes/                 # Definición de rutas
 │   ├── schema/                 # Esquemas de validación Zod
@@ -61,6 +70,7 @@ backend/
    nodemiler_user=tu_correo@ejemplo.com
    nodemailer_password=tu_contraseña
    BLOCK_TIME=60000
+   UPLOAD_DIR=uploads/books
    ```
 
 4. Inicia la aplicación en modo desarrollo:
@@ -75,18 +85,19 @@ backend/
 - `npm run build:watch`: Compila el código TypeScript en modo watch.
 - `npm run dev`: Inicia la aplicación en modo desarrollo con hot-reload.
 
-## Sistema de Autenticación
+## Funcionalidades Principales
 
-### Características
+### 1. Sistema de Autenticación
 
-- Registro de usuarios con validación de campos.
-- Inicio de sesión con token JWT.
-- Protección contra ataques de fuerza bruta.
-- Recuperación de contraseña mediante correo electrónico.
-- Validación de sesiones activas.
-- Control de acceso basado en roles (admin, user).
+#### Características
+- Registro de usuarios con validación de correo institucional
+- Inicio de sesión con token JWT
+- Protección contra ataques de fuerza bruta
+- Recuperación de contraseña mediante correo electrónico
+- Validación de sesiones activas
+- Control de acceso basado en roles (admin, user)
 
-### Endpoints de Autenticación
+#### Endpoints de Autenticación
 
 | Ruta | Método | Descripción | Middleware |
 |------|--------|-------------|------------|
@@ -98,43 +109,84 @@ backend/
 | `/auth/reset-password` | POST | Establecer nueva contraseña | Validación Zod |
 | `/auth/login/consult` | GET | Consulta de registros de login | Sesión, Rol Admin |
 
-### Flujos de Autenticación
+### 2. Gestión de Libros
 
-#### Registro de Usuario
+#### Características
+- Registro de nuevos libros con información detallada
+- Carga de imágenes de libros
+- Categorización por asignatura, curso o categoría
+- Sistema de estados (disponible, pendiente, intercambiado)
+- Búsqueda y filtrado avanzado
 
-1. El cliente envía datos del usuario (nombre, email, contraseña, etc.)
-2. Se validan los datos con Zod
-3. Se verifica que el email no esté registrado
-4. Se encripta la contraseña con bcrypt
-5. Se crea el nuevo usuario en la base de datos
-6. Se devuelve respuesta exitosa
+#### Endpoints de Libros
 
-#### Inicio de Sesión
+| Ruta | Método | Descripción | Middleware |
+|------|--------|-------------|------------|
+| `/books` | GET | Obtener todos los libros disponibles | - |
+| `/books/:id` | GET | Obtener detalles de un libro | - |
+| `/books` | POST | Crear nuevo libro | Sesión, Validación Zod |
+| `/books/:id` | PUT | Actualizar información de libro | Sesión, Propietario |
+| `/books/:id` | DELETE | Eliminar libro | Sesión, Propietario |
+| `/books/upload` | POST | Subir imagen de libro | Sesión, Multer |
+| `/books/search` | GET | Buscar libros por criterios | - |
+| `/books/user/:userId` | GET | Obtener libros de un usuario | - |
+| `/books/category/:category` | GET | Filtrar por categoría | - |
 
-1. El cliente envía email y contraseña
-2. Se verifica si hay intentos fallidos desde la IP del cliente
-3. Se busca al usuario en la base de datos
-4. Se compara la contraseña con la versión encriptada
-5. Se genera un token JWT con información del usuario
-6. Se establece una cookie HTTP-only con el token
-7. Se registra el inicio de sesión exitoso
+### 3. Sistema de Intercambios
 
-#### Recuperación de Contraseña
+#### Características
+- Solicitudes de intercambio entre usuarios
+- Gestión de propuestas (aceptar/rechazar)
+- Coordinación del intercambio físico
+- Confirmación y registro de intercambios completados
+- Historial de intercambios por usuario
 
-1. El usuario solicita recuperación con su email
-2. Se verifica que el email exista en la base de datos
-3. Se genera un token JWT con tiempo de expiración
-4. Se envía un correo con enlace de recuperación al usuario
-5. El usuario accede al enlace y establece nueva contraseña
-6. Se verifica el token y se actualiza la contraseña
+#### Endpoints de Intercambios
 
-#### Verificación de Sesión
+| Ruta | Método | Descripción | Middleware |
+|------|--------|-------------|------------|
+| `/exchange/request` | POST | Solicitar intercambio | Sesión, Validación Zod |
+| `/exchange/:id/accept` | PUT | Aceptar solicitud | Sesión, Propietario |
+| `/exchange/:id/reject` | PUT | Rechazar solicitud | Sesión, Propietario |
+| `/exchange/:id/complete` | PUT | Marcar como completado | Sesión, Participante |
+| `/exchange/user` | GET | Obtener intercambios del usuario | Sesión |
+| `/exchange/:id` | GET | Obtener detalles de intercambio | Sesión, Participante |
 
-1. Se extrae el token JWT de las cookies
-2. Se verifica la validez del token
-3. Se decodifica para obtener la información del usuario
-4. Se confirma que el usuario existe en la base de datos
-5. Se retorna la información del usuario autorizado
+### 4. Gestión de Instituciones
+
+#### Características
+- Registro de instituciones educativas
+- Validación de dominios de correo institucionales
+- Estadísticas por institución
+- Administración de usuarios por institución
+
+#### Endpoints de Instituciones
+
+| Ruta | Método | Descripción | Middleware |
+|------|--------|-------------|------------|
+| `/institucional` | GET | Listar instituciones registradas | - |
+| `/institucional/:id` | GET | Obtener detalles de institución | - |
+| `/institucional` | POST | Registrar nueva institución | Sesión, Rol Admin |
+| `/institucional/:id` | PUT | Actualizar institución | Sesión, Rol Admin |
+| `/institucional/domains` | GET | Listar dominios autorizados | - |
+| `/institucional/stats/:id` | GET | Estadísticas de institución | Sesión, Rol Admin |
+
+### 5. Gestión de Usuarios
+
+#### Características
+- Perfiles de usuario
+- Historial de actividad
+- Gestión de preferencias
+- Sistema de reputación basado en intercambios completados
+
+#### Endpoints de Usuarios
+
+| Ruta | Método | Descripción | Middleware |
+|------|--------|-------------|------------|
+| `/users/profile` | GET | Obtener perfil del usuario actual | Sesión |
+| `/users/profile` | PUT | Actualizar perfil | Sesión, Validación Zod |
+| `/users/:id/reputation` | GET | Ver reputación de usuario | - |
+| `/users/history` | GET | Historial de actividad | Sesión |
 
 ## Middleware
 
@@ -143,14 +195,21 @@ backend/
 El sistema utiliza middleware de validación basado en Zod para verificar los datos de entrada:
 
 ```typescript
-// Ejemplo de esquema de validación
-export const loginSchema = z.object({
-    email: z.string().email({
-        message: "El email debe ser válido",
+// Ejemplo de esquema de validación para libros
+export const bookSchema = z.object({
+    title: z.string().min(2, {
+        message: "El título debe tener al menos 2 caracteres",
     }),
-    password: z.string().min(6, {
-        message: "La contraseña debe tener al menos 6 caracteres",
+    author: z.string().min(2, {
+        message: "El autor debe tener al menos 2 caracteres",
     }),
+    isbn: z.string().optional(),
+    condition: z.enum(["nuevo", "como_nuevo", "buen_estado", "aceptable"]),
+    description: z.string().min(10, {
+        message: "La descripción debe tener al menos 10 caracteres",
+    }),
+    category: z.string(),
+    course: z.string().optional(),
 });
 ```
 
@@ -160,7 +219,7 @@ Middleware para verificar si el usuario está autenticado:
 
 ```typescript
 // Uso en rutas
-router.get("/login/consult", ckeckSession, checkRole("admin"), getLogin);
+router.post("/books", checkSession, validateSchema(bookSchema), createBook);
 ```
 
 ### Control de Roles
@@ -172,20 +231,52 @@ Middleware para verificar el rol del usuario:
 checkRole("admin")
 ```
 
-## Arquitectura
+### Verificación de Propiedad
 
-El proyecto sigue una arquitectura en capas:
+Middleware para verificar si el usuario es propietario del recurso:
 
-1. **Rutas**: Definición de endpoints y conexión con controladores.
-2. **Controladores**: Manejo de solicitudes HTTP y respuestas.
-3. **Servicios**: Lógica de negocio.
-4. **Repositorios**: Interacción con la base de datos.
+```typescript
+// Ejemplo de uso
+checkOwnership("bookId")
+```
 
-Esta separación permite un mejor mantenimiento y testabilidad del código.
+## Gestión de Archivos
 
-## Documentación API
+Para la carga de imágenes de libros, se utiliza Multer:
 
-La API está documentada con Swagger y disponible en la ruta `/api-docs` cuando el servidor está en ejecución.
+```typescript
+// Configuración de Multer
+const storage = multer.diskStorage({
+    destination: (req, file, cb) => {
+        cb(null, process.env.UPLOAD_DIR || 'uploads/books');
+    },
+    filename: (req, file, cb) => {
+        const uniqueSuffix = Date.now() + '-' + Math.round(Math.random() * 1E9);
+        cb(null, uniqueSuffix + path.extname(file.originalname));
+    }
+});
+
+const upload = multer({ 
+    storage, 
+    fileFilter: (req, file, cb) => {
+        // Validar tipos de archivo
+        const fileTypes = /jpeg|jpg|png|webp/;
+        const mimetype = fileTypes.test(file.mimetype);
+        const extname = fileTypes.test(path.extname(file.originalname).toLowerCase());
+        
+        if (mimetype && extname) {
+            return cb(null, true);
+        }
+        cb(new Error('Formato de archivo no válido. Solo se permiten imágenes (jpeg, jpg, png, webp)'));
+    },
+    limits: {
+        fileSize: 5 * 1024 * 1024, // 5MB máximo
+    }
+});
+
+// Uso en rutas
+router.post('/books/upload', checkSession, upload.single('image'), uploadBookImage);
+```
 
 ## Seguridad
 
@@ -194,6 +285,13 @@ La API está documentada con Swagger y disponible en la ruta `/api-docs` cuando 
 - Protección contra ataques de fuerza bruta
 - Validación estricta de datos de entrada
 - Control de acceso basado en roles
+- Sanitización de entradas para prevenir inyecciones
+- Rate limiting para prevenir abusos
+- Validación de dominios de correo institucionales
+
+## Documentación API
+
+La API está documentada con Swagger y disponible en la ruta `/api-docs` cuando el servidor está en ejecución.
 
 ## Desarrollo
 
@@ -217,7 +315,11 @@ La API está documentada con Swagger y disponible en la ruta `/api-docs` cuando 
 - **jsonwebtoken**: Implementación de JWT
 - **zod**: Validación de esquemas
 - **nodemailer**: Envío de correos electrónicos
+- **multer**: Gestión de carga de archivos
 - **swagger-jsdoc/swagger-ui-express**: Documentación API
+- **cors**: Configuración de CORS para seguridad
+- **helmet**: Protección con cabeceras HTTP
+- **express-rate-limit**: Limitación de solicitudes
 
 ## Contacto
 
