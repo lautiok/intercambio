@@ -1,4 +1,4 @@
-import HeaderLanding from "@/layout/headerLanding/headerLanding";
+import HeaderLanding from "@/components/headerLanding/headerLanding";
 
 export default function Home() {
   return (

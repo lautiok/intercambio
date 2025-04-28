@@ -13,7 +13,6 @@ import {
   clearLoginAttempts,
   increaseLoginAttempts,
 } from "../utils/loginAttempts";
-import nodemailer from "nodemailer";
 import { transporter } from "../config/nodemailer";
 
 
@@ -53,9 +52,17 @@ export const registerAuth = async (
     };
 
     const user = await userService.createUser(newUser);
+
+    const userPublic = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      institutional: user.institutional,
+    };
     return res
       .status(201)
-      .json({ message: "el usuario se creó correctamente", user });
+      .json({ message: "el usuario se creó correctamente", user: userPublic });
   } catch (error) {
     return res.status(500).json({ message: "Error en el servidor" });
   }
@@ -106,13 +113,21 @@ export const loginAuth = async (req: Request, res: Response): Promise<any> => {
       { expiresIn: "1d" }
     );
 
+    const userPublic = {
+      id: user._id,
+      name: user.name,
+      email: user.email,
+      role: user.role,
+      institutional: user.institutional,
+    };
+
     res
       .cookie("access_token", token, {
         httpOnly: true,
         secure: process.env.NODE_ENV === "production",
       })
       .status(200)
-      .json({ message: "User logged in successfully", user });
+      .json({ message: "User logged in successfully", user: userPublic });
 
     await loginService.createLogin({ email, ip_address: ip });
   } catch (error) {

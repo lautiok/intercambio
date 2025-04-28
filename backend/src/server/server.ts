@@ -3,6 +3,7 @@ import morgan from 'morgan';
 import UsersRoutes from '../routes/v1/users.routes';
 import InstitutionalRoutes from '../routes/v1/intitucional.routes';
 import AuthRoutes from '../routes/v1/auth.routes';
+import booksRoutes from '../routes/v1/books.route';
 import cookieParser from 'cookie-parser';
 import cors from 'cors';
 import swaggerUI from "swagger-ui-express"
@@ -24,6 +25,7 @@ app.use(cors(
 
 app.use("/api/v1/users", ckeckSession, checkRole("admin") , UsersRoutes);
 app.use("/api/v1/institucional" , InstitutionalRoutes);
+app.use("/api/v1/books", ckeckSession, booksRoutes);
 app.use("/api/v1/documents", swaggerUI.serve, swaggerUI.setup(specs)) 
 app.use("/api/v1/auth", AuthRoutes); 
 

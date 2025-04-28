@@ -1,7 +1,7 @@
 "use client";
 
 import styles from "./reset-password.module.css";
-import HeroAuth from "@/layout/heroAuth/heroAuth";
+import HeroAuth from "@/components/heroAuth/heroAuth";
 import toast, { Toaster } from "react-hot-toast";
 import { useForm } from 'react-hook-form';
 import { useAuth } from "@/context/authContext";

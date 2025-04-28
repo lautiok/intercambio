@@ -1,13 +1,13 @@
 "use client";
 
-import { useAuth } from "@/context/authContext";
+import AreaIntercambio from "@/components/areaIntercambio/areaIntercambio";
+
 
 export default function page() {
 
-    const { logout } = useAuth();
   return (
-      <div>
-          <button onClick={logout}>Logout</button>
-      </div>
+      <main>
+          <AreaIntercambio />
+      </main>
   );
 }

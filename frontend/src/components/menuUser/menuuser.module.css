@@ -1,0 +1,68 @@
+.menu {
+    position: relative;
+    display: flex;
+    align-items: center;
+  }
+  
+  .button {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    padding: 0.5rem;
+    border-radius: 50%;
+    transition: background-color 0.3s ease;
+  }
+  
+  .button:hover {
+    background-color: rgba(0, 0, 0, 0.1);
+  }
+  
+  .menuContainer {
+    position: absolute;
+    top: 100%;
+    right: 0;
+    margin-top: 0.5rem;
+    background-color: #fff;
+    border: 1px solid #e5e5e5;
+    border-radius: 10px;
+    box-shadow: 0 4px 12px rgba(0, 0, 0, 0.1);
+    z-index: 999;
+    min-width: 220px;
+    padding: 1rem;
+  }
+  
+  .menuUser {
+    margin-bottom: 1rem;
+  }
+  
+  .menuUser h3 {
+    margin: 0;
+    font-size: 1rem;
+    color: #333;
+  }
+  
+  .menuUser p {
+    margin: 0.25rem 0 0;
+    font-size: 0.875rem;
+    color: #666;
+  }
+  
+  .menuButtons {
+    display: flex;
+    justify-content: flex-end;
+  }
+  
+  .menuButtons button {
+    background-color: #9a7d5f;
+    color: #fff;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    border-radius: 5px;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+  }
+  
+  .menuButtons button:hover {
+    background-color: #7d664c;
+  }
+  

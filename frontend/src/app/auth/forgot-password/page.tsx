@@ -1,7 +1,7 @@
 "use client";
 import toast, { Toaster } from "react-hot-toast";
 import styles from "./forgot-password.module.css";
-import HeroAuth from "@/layout/heroAuth/heroAuth";
+import HeroAuth from "@/components/heroAuth/heroAuth";
 import { useForm } from 'react-hook-form';
 import { useAuth } from "@/context/authContext";
 import { useRouter } from "next/navigation";

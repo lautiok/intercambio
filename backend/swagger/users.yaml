@@ -11,7 +11,7 @@ paths:
         - Users
       description: Devuelve una lista de todos los usuarios. Solo accesible para administradores.
       security:
-        - BearerAuth: []
+        - cookieAuth: []
       responses:
         '200':
           description: Lista de usuarios obtenida con éxito
@@ -21,8 +21,47 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/User'
+              example:
+                - id: "60d5a8c3e3b16a001f5b1c89"
+                  name: "Admin User"
+                  email: "admin@example.com"
+                  role: "admin"
+                  institutional: "60c72b2f9b1e8e001f8f2b58"
+                - id: "60d5a8d5e3b16a001f5b1c8a"
+                  name: "Regular User"
+                  email: "user@example.com"
+                  role: "user"
+                  institutional: "60c72b2f9b1e8e001f8f2b58"
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No está autorizado para acceder a este recurso"
+        '403':
+          description: Prohibido
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Acceso prohibido: se requiere rol de administrador"
         '500':
           description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
 
   /api/v1/users/{id}:
     get:
@@ -31,11 +70,12 @@ paths:
         - Users
       description: Devuelve los detalles de un usuario específico.
       security:
-        - BearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
           required: true
+          description: ID del usuario
           schema:
             type: string
       responses:
@@ -45,8 +85,32 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/User'
+              example:
+                id: "60d5a8c3e3b16a001f5b1c89"
+                name: "Admin User"
+                email: "admin@example.com"
+                role: "admin"
+                institutional: "60c72b2f9b1e8e001f8f2b58"
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Usuario no encontrado"
         '500':
           description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
 
     put:
       summary: Actualizar un usuario
@@ -54,11 +118,12 @@ paths:
         - Users
       description: Actualiza la información de un usuario específico.
       security:
-        - BearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
           required: true
+          description: ID del usuario a actualizar
           schema:
             type: string
       requestBody:
@@ -66,12 +131,70 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/User'
+              type: object
+              properties:
+                name:
+                  type: string
+                  example: "Updated Name"
+                email:
+                  type: string
+                  format: email
+                  example: "updated.email@example.com"
+                role:
+                  type: string
+                  enum: [user, admin]
+                  example: "admin"
+                institutional:
+                  type: string
+                  example: "60c72b2f9b1e8e001f8f2b58"
+              required:
+                - name
+                - email
+                - role
+                - institutional
       responses:
         '200':
           description: Usuario actualizado con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Usuario actualizado exitosamente"
+                  user:
+                    $ref: '#/components/schemas/User'
+        '400':
+          description: Datos de solicitud inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Datos inválidos"
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Usuario no encontrado"
         '500':
           description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
 
     delete:
       summary: Eliminar un usuario
@@ -79,35 +202,75 @@ paths:
         - Users
       description: Elimina un usuario específico.
       security:
-        - BearerAuth: []
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
           required: true
+          description: ID del usuario a eliminar
           schema:
             type: string
       responses:
         '200':
           description: Usuario eliminado con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Usuario eliminado exitosamente"
+        '404':
+          description: Usuario no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Usuario no encontrado"
         '500':
           description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
 
 components:
   securitySchemes:
-    BearerAuth:
-      type: http
-      scheme: bearer
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
   schemas:
     User:
       type: object
       properties:
         id:
           type: string
+          description: Identificador único del usuario
         name:
           type: string
+          description: Nombre completo del usuario
         email:
           type: string
+          format: email
+          description: Correo electrónico del usuario
         role:
           type: string
+          enum: [user, admin]
+          description: Rol del usuario en el sistema
         institutional:
           type: string
+          description: ID de la institución a la que pertenece el usuario
+      required:
+        - name
+        - email
+        - role
+        - institutional

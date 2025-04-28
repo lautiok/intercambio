@@ -1,0 +1,35 @@
+.mislibros {
+    max-width: 1500px;
+    margin: 0 auto;
+}
+
+.header {
+    display: flex;
+    justify-content: space-between;
+}
+
+.header h2 {
+    font-size: 1rem;
+    color: #535353;
+    
+}
+
+.headerButtons a {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    color: #535353;
+    text-decoration: none;
+}
+
+.headerButtons p {
+    font-size: 1rem;
+    color: #535353;
+}
+
+.containerBooks {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+    gap: 1rem;
+    margin-top: 1rem;
+}

@@ -1,0 +1,363 @@
+openapi: 3.0.0
+info:
+  title: Books Management API
+  description: API para la gestión de libros en la plataforma de intercambio.
+  version: 1.0.0
+paths:
+  /api/v1/books:
+    post:
+      summary: Crear un nuevo libro
+      tags:
+        - Books
+      description: Crea un nuevo libro con la información proporcionada y una imagen.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          multipart/form-data:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "El principito"
+                  description: Título del libro
+                author:
+                  type: string
+                  example: "Antoine de Saint-Exupéry"
+                  description: Autor del libro
+                description:
+                  type: string
+                  example: "Un clásico de la literatura francesa sobre un principito que viaja por diferentes planetas."
+                  description: Descripción detallada del libro
+                interes:
+                  type: string
+                  example: "Ficción"
+                  description: Categoría de interés del libro
+                image:
+                  type: string
+                  format: binary
+                  description: Imagen de portada del libro
+              required:
+                - title
+                - author
+                - description
+                - interes
+                - image
+      responses:
+        '201':
+          description: Libro creado exitosamente
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Datos de solicitud inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Faltan campos"
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "No tienes permisos para realizar esta acción"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al crear el libro"
+                  error:
+                    type: object
+                    example: {}
+    get:
+      summary: Obtener todos los libros
+      tags:
+        - Books
+      description: Devuelve una lista de todos los libros disponibles.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Lista de libros obtenida con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Book'
+              example:
+                - _id: "60d5a8c3e3b16a001f5b1c89"
+                  title: "El principito"
+                  author: "Antoine de Saint-Exupéry"
+                  description: "Un clásico de la literatura francesa sobre un principito que viaja por diferentes planetas."
+                  interes: ["Ficción", "Clásicos"]
+                  status: true
+                  iduser:
+                    _id: "60d5a8d5e3b16a001f5b1c8a"
+                    name: "Usuario Ejemplo"
+                    email: "usuario@ejemplo.com"
+                  image:
+                    public_id: "books/el-principito-1234567890"
+                    secure_url: "https://res.cloudinary.com/example/image/upload/v1234567890/books/el-principito-1234567890.jpg"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al obtener los libros"
+                  error:
+                    type: object
+                    example: {}
+
+  /api/v1/books/{id}:
+    get:
+      summary: Obtener un libro por ID
+      tags:
+        - Books
+      description: Devuelve los detalles de un libro específico.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del libro
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Libro obtenido con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '404':
+          description: Libro no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Libro no encontrado"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al obtener el libro"
+                  error:
+                    type: object
+                    example: {}
+
+    put:
+      summary: Actualizar un libro
+      tags:
+        - Books
+      description: Actualiza la información de un libro específico.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del libro a actualizar
+          schema:
+            type: string
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                title:
+                  type: string
+                  example: "El principito (Edición actualizada)"
+                author:
+                  type: string
+                  example: "Antoine de Saint-Exupéry"
+                description:
+                  type: string
+                  example: "Nueva descripción del libro actualizada."
+                interes:
+                  type: string
+                  example: "Ficción, Clásicos"
+              required:
+                - title
+                - author
+                - description
+                - interes
+      responses:
+        '200':
+          description: Libro actualizado con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Book'
+        '400':
+          description: Datos de solicitud inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Faltan campos"
+        '404':
+          description: Libro no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Libro no encontrado"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al actualizar el libro"
+                  error:
+                    type: object
+                    example: {}
+
+    delete:
+      summary: Eliminar un libro
+      tags:
+        - Books
+      description: Elimina un libro específico y su imagen de Cloudinary.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID del libro a eliminar
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Libro eliminado con éxito
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Libro eliminado"
+        '404':
+          description: Libro no encontrado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Libro no encontrado"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al eliminar el libro"
+                  error:
+                    type: object
+                    example: {}
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+  schemas:
+    Book:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del libro
+        title:
+          type: string
+          description: Título del libro
+        author:
+          type: string
+          description: Autor del libro
+        description:
+          type: string
+          description: Descripción detallada del libro
+        interes:
+          type: array
+          items:
+            type: string
+          description: Categorías de interés asociadas al libro
+        status:
+          type: boolean
+          description: Estado del libro (disponible o no)
+          default: true
+        iduser:
+          type: object
+          properties:
+            _id:
+              type: string
+            name:
+              type: string
+            email:
+              type: string
+          description: Usuario que publicó el libro
+        image:
+          type: object
+          properties:
+            public_id:
+              type: string
+              description: ID público de la imagen en Cloudinary
+            secure_url:
+              type: string
+              description: URL segura para acceder a la imagen
+          description: Información de la imagen del libro
+      required:
+        - title
+        - author
+        - description
+        - interes
+        - iduser
+        - image

@@ -2,14 +2,17 @@ openapi: 3.0.0
 info:
   title: Institucional API
   version: 1.0.0
+  description: API para la gestión de instituciones
 tags:
   - name: Institucional
+    description: Operaciones relacionadas con instituciones
 paths:
   /api/v1/institucional:
     get:
       summary: Obtener todas las instituciones
       tags:
         - Institucional
+      description: Recupera la lista completa de instituciones registradas
       responses:
         '200':
           description: Lista de instituciones
@@ -19,16 +22,48 @@ paths:
                 type: array
                 items:
                   $ref: '#/components/schemas/Institucional'
+              example:
+                - _id: "60c72b2f9b1e8e001f8f2b58"
+                  institucion: "Universidad de la Vida"
+                  direccion: "Av. Siempre Viva 123"
+                  email: "contacto@universidadvida.com"
+                  telefono: "+1234567890"
+                  pais: "Argentina"
+                - _id: "60c72c3f9b1e8e001f8f2b59"
+                  institucion: "Instituto Tecnológico Superior"
+                  direccion: "Calle Innovación 456"
+                  email: "info@tecno.edu"
+                  telefono: "+0987654321"
+                  pais: "México"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
     post:
       summary: Crear una nueva institución
       tags:
         - Institucional
+      description: Registra una nueva institución en el sistema
+      security:
+        - cookieAuth: []
       requestBody:
         required: true
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Institucional'
+              $ref: '#/components/schemas/InstitucionalInput'
+            example:
+              institucion: "Centro de Estudios Avanzados"
+              direccion: "Plaza Central 789"
+              email: "contacto@cea.org"
+              telefono: "+5678901234"
+              pais: "España"
       responses:
         '201':
           description: Institución creada exitosamente
@@ -36,16 +71,55 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Institucional'
+              example:
+                _id: "60c72d4f9b1e8e001f8f2b5a"
+                institucion: "Centro de Estudios Avanzados"
+                direccion: "Plaza Central 789"
+                email: "contacto@cea.org"
+                telefono: "+5678901234"
+                pais: "España"
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Datos inválidos para la creación de la institución"
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No está autorizado para realizar esta acción"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
 
   /api/v1/institucional/{id}:
     get:
       summary: Obtener una institución por ID
       tags:
         - Institucional
+      description: Recupera los detalles de una institución específica
       parameters:
         - name: id
           in: path
           required: true
+          description: ID de la institución
           schema:
             type: string
       responses:
@@ -55,14 +129,45 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Institucional'
+              example:
+                _id: "60c72b2f9b1e8e001f8f2b58"
+                institucion: "Universidad de la Vida"
+                direccion: "Av. Siempre Viva 123"
+                email: "contacto@universidadvida.com"
+                telefono: "+1234567890"
+                pais: "Argentina"
+        '404':
+          description: Institución no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Institución no encontrada"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
     put:
       summary: Actualizar una institución por ID
       tags:
         - Institucional
+      description: Actualiza la información de una institución específica
+      security:
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
           required: true
+          description: ID de la institución a actualizar
           schema:
             type: string
       requestBody:
@@ -70,7 +175,13 @@ paths:
         content:
           application/json:
             schema:
-              $ref: '#/components/schemas/Institucional'
+              $ref: '#/components/schemas/InstitucionalInput'
+            example:
+              institucion: "Universidad de la Vida (Actualizado)"
+              direccion: "Av. Siempre Viva 123, Piso 2"
+              email: "nuevo.contacto@universidadvida.com"
+              telefono: "+1234567899"
+              pais: "Argentina"
       responses:
         '200':
           description: Institución actualizada exitosamente
@@ -78,21 +189,115 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/Institucional'
+              example:
+                _id: "60c72b2f9b1e8e001f8f2b58"
+                institucion: "Universidad de la Vida (Actualizado)"
+                direccion: "Av. Siempre Viva 123, Piso 2"
+                email: "nuevo.contacto@universidadvida.com"
+                telefono: "+1234567899"
+                pais: "Argentina"
+        '400':
+          description: Datos inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Datos inválidos para la actualización"
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No está autorizado para realizar esta acción"
+        '404':
+          description: Institución no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Institución no encontrada"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
     delete:
       summary: Eliminar una institución por ID
       tags:
         - Institucional
+      description: Elimina una institución específica del sistema
+      security:
+        - cookieAuth: []
       parameters:
         - name: id
           in: path
           required: true
+          description: ID de la institución a eliminar
           schema:
             type: string
       responses:
         '200':
           description: Institución eliminada exitosamente
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Institución eliminada exitosamente"
+        '401':
+          description: No autorizado
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "No está autorizado para realizar esta acción"
+        '404':
+          description: Institución no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Institución no encontrada"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  error:
+                    type: string
+                    example: "Error interno del servidor"
 
 components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: token
   schemas:
     Institucional:
       type: object
@@ -122,13 +327,29 @@ components:
         - email
         - telefono
         - pais
-
-examples:
-  InstitucionalExample:
-    value:
-      _id: "60c72b2f9b1e8e001f8f2b58"
-      institucion: "Universidad de la Vida"
-      direccion: "Av. Siempre Viva 123"
-      email: "contacto@universidadvida.com"
-      telefono: "+1234567890"
-      pais: "Argentina"
+    
+    InstitucionalInput:
+      type: object
+      properties:
+        institucion:
+          type: string
+          description: Nombre de la institución
+        direccion:
+          type: string
+          description: Dirección de la institución
+        email:
+          type: string
+          format: email
+          description: Correo electrónico de la institución
+        telefono:
+          type: string
+          description: Número de teléfono de la institución
+        pais:
+          type: string
+          description: País de la institución
+      required:
+        - institucion
+        - direccion
+        - email
+        - telefono
+        - pais

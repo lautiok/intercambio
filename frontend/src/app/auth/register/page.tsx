@@ -1,5 +1,5 @@
 "use client";
-import HeroAuth from "@/layout/heroAuth/heroAuth";
+import HeroAuth from "@/components/heroAuth/heroAuth";
 import styles from "./register.module.css";
 import Link from "next/link";
 import { useForm } from "react-hook-form";

@@ -1,3 +1,4 @@
+import HeaderDashboard from "@/components/headerDashboard/headerDashboard";
 import { ProtectedRoute } from "@/components/ProtectedRoute";
 
 export default function intercambioLayout({
@@ -8,6 +9,7 @@ export default function intercambioLayout({
   return (
     <section>
         <ProtectedRoute>
+          <HeaderDashboard />
             {children}
         </ProtectedRoute>
     </section>

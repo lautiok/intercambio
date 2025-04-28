@@ -17,7 +17,7 @@ export default function HeaderLanding() {
             </ul>
         </nav>
         <div className={styles.buttons}>
-            <Link href="/auth/login">
+            <Link href="/intercambio">
                 <button className={styles.button}>Intercambiar</button>
             </Link>
         </div>

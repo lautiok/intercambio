@@ -1,0 +1,55 @@
+.card {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    height: 350px; 
+    justify-content: space-between; 
+    padding: 1rem;
+    box-sizing: border-box;
+  }
+  
+
+.card img {
+    height: 200px;
+    width: 200px;
+    object-fit: cover;
+    border-radius: 10px;
+}
+
+.card h2 {
+    font-size: 1.3rem;
+    font-weight: 500;
+    color: #535353;
+    text-align: center;
+    max-height: 1.6em; 
+    overflow: hidden;
+  }
+  
+
+.buttonEdit {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    gap: 0.5rem;
+}
+
+.buttonEdit a {
+    display: block;
+    background-color: #3835ff;
+    color: #fff;
+    padding: 0.5rem 1.5rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1rem;
+}
+
+.buttonDelete {
+    background-color: #ff4436;
+    color: #fff;
+    padding: 0.7rem 1rem;
+    border-radius: 5px;
+    text-decoration: none;
+    font-size: 1rem;
+    border: none;
+    cursor: pointer;
+}
