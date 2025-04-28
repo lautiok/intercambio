@@ -1,198 +1,102 @@
-# Intercambia - Sistema de Autenticación
+# Intercambia - Plataforma de Intercambio de Libros
 
 ## Descripción General
 
-Este documento describe el sistema de autenticación implementado en el proyecto Intercambia, una plataforma que ofrece funcionalidades de registro, inicio de sesión, verificación de sesiones, recuperación de contraseñas y control de acceso basado en roles.
+Intercambia es una plataforma innovadora diseñada para facilitar el intercambio de libros entre miembros de instituciones educativas como colegios, universidades y bibliotecas. El proyecto busca fomentar la cultura de compartir recursos educativos, promover la sostenibilidad y crear una comunidad de lectores conectados a través de sus instituciones.
+
+La plataforma está especialmente enfocada en entornos educativos, donde los usuarios pueden intercambiar materiales académicos y literarios de manera sencilla y organizada, utilizando sus credenciales institucionales para garantizar un entorno seguro y confiable.
 
 ## Características Principales
 
-- **Registro de usuarios**: Creación de cuentas con validación de datos.
-- **Inicio de sesión seguro**: Autenticación con email y contraseña.
-- **Protección contra ataques de fuerza bruta**: Sistema de bloqueo de intentos fallidos.
-- **Recuperación de contraseña**: Proceso completo con tokens JWT y correos electrónicos.
-- **Control de sesiones**: Verificación de tokens y manejo de cookies.
-- **Control de acceso basado en roles**: Diferentes niveles de permisos (admin, user).
-- **Validación de datos**: Implementación de validadores con Zod.
+### Sistema de Autenticación Institucional
+- **Registro con correo institucional**: Verificación automática de dominios autorizados.
+- **Verificación de cuentas**: Proceso seguro mediante email u otros medios internos.
+- **Acceso controlado**: Solo miembros verificados de instituciones participantes.
 
-## Arquitectura
+### Gestión de Libros
+- **Subida de libros**: Los usuarios pueden ofrecer sus libros especificando detalles como título, autor, ISBN, estado físico, fotografías y descripción personalizada.
+- **Categorización**: Organización por categoría, curso o asignatura para facilitar la búsqueda.
+- **Estado de disponibilidad**: Sistema que marca los libros como "Disponible", "En proceso de intercambio" o "Intercambiado".
 
-El sistema de autenticación está estructurado en:
+### Exploración y Búsqueda
+- **Catálogo navegable**: Interfaz intuitiva para explorar libros disponibles.
+- **Filtros avanzados**: Búsqueda por categoría, título, autor o institución.
+- **Visualización detallada**: Información completa de cada libro con imágenes.
 
-### Backend (TypeScript + Express + MongoDB)
+### Sistema de Intercambio
+- **Solicitudes personalizadas**: Los usuarios pueden solicitar un libro ofreciendo otro a cambio.
+- **Gestión de solicitudes**: Propietarios pueden aceptar o rechazar propuestas de intercambio.
+- **Coordinación interna**: Comunicación entre usuarios para acordar la entrega física.
+- **Finalización y registro**: Confirmación del intercambio completado y actualización de historial.
 
-- **Controladores**: Manejo de lógica de autenticación (`auth.controllers.ts`)
-- **Rutas**: Endpoints para las operaciones de autenticación (`auth.routes.ts`)
-- **Middleware**: 
-  - Validación de datos con Zod
-  - Control de sesiones
-  - Verificación de roles
-- **Servicios**: Lógica de negocio para usuarios y login
-- **Repositorios**: Acceso a datos y operaciones CRUD
+### Extras
+- **Panel administrativo institucional**: Herramientas para que las instituciones gestionen su comunidad.
+- **Estadísticas de uso**: Métricas sobre intercambios y actividad en la plataforma.
+- **Validación de usuarios**: Sistema para verificar la pertenencia de usuarios a instituciones.
+
+## Flujos de Usuario
+
+### Registro e Inicio de Sesión
+1. Usuario se registra con correo institucional (sistema verifica dominio autorizado)
+2. Recibe verificación de cuenta (email u otro medio interno)
+3. Accede a su perfil personalizado dentro de la plataforma
+
+### Publicación de Libros
+1. Usuario sube un libro para ofrecer al intercambio
+2. Completa formulario con título, autor, ISBN, estado, fotografía y descripción
+3. Selecciona categoría, curso o asignatura relevante
+4. El libro queda registrado como "Disponible" en la base de datos
+
+### Exploración y Solicitud
+1. Usuario explora los libros disponibles usando filtros personalizados
+2. Al encontrar un libro de interés, envía solicitud de intercambio
+3. Selecciona cuál de sus propios libros ofrece a cambio
+4. La solicitud queda registrada como "Pendiente" para el propietario
+
+### Gestión de Solicitudes
+1. Propietario del libro recibe notificación de solicitud
+2. Revisa la oferta y decide aceptar o rechazar
+3. Si acepta:
+   - Ambos libros cambian a estado "Intercambio acordado"
+   - Se habilita una conversación interna para coordinar la entrega
+4. Si rechaza:
+   - La solicitud se marca como "Rechazada"
+   - El solicitante puede buscar otros libros o hacer otras ofertas
+
+### Finalización del Intercambio
+1. Tras la entrega física de los libros, usuarios marcan el intercambio como "Completado"
+2. Los libros se registran como "Intercambiados" en el sistema
+3. Se actualiza el historial de intercambios en cada perfil
+4. Sistema genera estadísticas sobre la actividad
+
+## Arquitectura Técnica
+
+El proyecto está dividido en dos componentes principales:
+
+### Backend (Express + TypeScript + MongoDB)
+- API RESTful para gestión de usuarios, libros e intercambios
+- Sistema robusto de autenticación con JWT
+- Validación de datos con Zod
+- Arquitectura en capas (controladores, servicios, repositorios)
+- Documentación API con Swagger
 
 ### Frontend (Next.js + React)
+- Interfaz de usuario moderna y responsiva
+- Autenticación gestionada con Context API
+- Formularios validados con React Hook Form
+- Sistema de notificaciones con React Hot Toast
+- Componentes reutilizables y layouts estructurados
 
-- **Context API**: Gestión de estado de autenticación global (`authContext.tsx`)
-- **API Clients**: Funciones para interactuar con el backend (`authApi.ts`)
-- **Hooks personalizados**: Para la verificación de autenticación
+## Instalación y Despliegue
 
-## Flujos de Autenticación
+Para información detallada sobre la instalación y configuración de cada componente, consulte los archivos README específicos en las carpetas:
+- [Backend](./backend/README.md)
+- [Frontend](./frontend/README.md)
 
-### Registro de Usuario
+## Equipo y Contacto
 
-1. El cliente envía datos del usuario (nombre, email, contraseña, etc.)
-2. Se validan los datos con Zod
-3. Se verifica que el email no esté registrado
-4. Se encripta la contraseña con bcrypt
-5. Se crea el nuevo usuario en la base de datos
-6. Se devuelve respuesta exitosa
+Intercambia es un proyecto desarrollado como solución innovadora para comunidades educativas. Para más información o soporte, contacte al equipo de desarrollo.
 
-### Inicio de Sesión
+---
 
-1. El cliente envía email y contraseña
-2. Se verifica si hay intentos fallidos desde la IP del cliente
-3. Se busca al usuario en la base de datos
-4. Se compara la contraseña con la versión encriptada
-5. Se genera un token JWT con información del usuario
-6. Se establece una cookie HTTP-only con el token
-7. Se registra el inicio de sesión exitoso
-
-### Recuperación de Contraseña
-
-1. El usuario solicita recuperación con su email
-2. Se verifica que el email exista en la base de datos
-3. Se genera un token JWT con tiempo de expiración
-4. Se envía un correo con enlace de recuperación al usuario
-5. El usuario accede al enlace y establece nueva contraseña
-6. Se verifica el token y se actualiza la contraseña
-
-### Verificación de Sesión
-
-1. Se extrae el token JWT de las cookies
-2. Se verifica la validez del token
-3. Se decodifica para obtener la información del usuario
-4. Se confirma que el usuario existe en la base de datos
-5. Se retorna la información del usuario autorizado
-
-## Seguridad
-
-- **Contraseñas**: Almacenadas con hash utilizando bcrypt
-- **Tokens**: JWT con tiempo de expiración (1 día)
-- **Cookies**: HTTP-only para prevenir ataques XSS
-- **Protección contra fuerza bruta**: Bloqueo temporal después de múltiples intentos fallidos
-- **Validación**: Esquemas Zod para validar todas las entradas de datos
-
-## Endpoints API
-
-### Autenticación
-
-| Ruta | Método | Descripción | Middleware |
-|------|--------|-------------|------------|
-| `/auth/register` | POST | Registro de nuevos usuarios | Validación Zod |
-| `/auth/login` | POST | Inicio de sesión | Validación Zod |
-| `/auth/logout` | POST | Cierre de sesión | - |
-| `/auth/verify` | POST | Verificación de token | - |
-| `/auth/forgot-password` | POST | Solicitud de recuperación | Validación Zod |
-| `/auth/reset-password` | POST | Establecer nueva contraseña | Validación Zod |
-| `/auth/login/consult` | GET | Consulta de registros de login | Sesión, Rol Admin |
-
-## Uso en Frontend
-
-### Contexto de Autenticación
-
-El proyecto utiliza un contexto de React para gestionar el estado de autenticación:
-
-```typescript
-// Ejemplo de uso del contexto de autenticación
-import { useAuth } from "@/context/authContext";
-
-function MyComponent() {
-  const { user, login, logout, loading, error } = useAuth();
-  
-  const handleLogin = async (email, password) => {
-    const success = await login(email, password);
-    if (success) {
-      // Redirigir o mostrar mensaje de éxito
-    }
-  };
-  
-  return (
-    <div>
-      {user ? (
-        <button onClick={logout}>Cerrar sesión</button>
-      ) : (
-        <LoginForm onSubmit={handleLogin} />
-      )}
-    </div>
-  );
-}
-```
-
-### Verificación de Sesión
-
-```typescript
-import { useAuth } from "@/context/authContext";
-import { useRouter } from "next/navigation";
-import { useEffect } from "react";
-
-function ProtectedPage() {
-  const { user, isCheckingAuth } = useAuth();
-  const router = useRouter();
-  
-  useEffect(() => {
-    if (!isCheckingAuth && !user) {
-      router.push("/auth/login");
-    }
-  }, [user, isCheckingAuth, router]);
-  
-  if (isCheckingAuth) {
-    return <div>Cargando...</div>;
-  }
-  
-  return <div>Contenido protegido</div>;
-}
-```
-
-## Validación de Datos
-
-El sistema utiliza Zod para la validación de datos en las solicitudes:
-
-### Ejemplos de Esquemas
-
-```typescript
-// Esquema de registro
-export const registerSchema = z.object({
-    email: z.string().email({
-        message: "El email debe ser válido",
-    }),
-    password: z.string().min(6, {
-        message: "La contraseña debe tener al menos 6 caracteres",
-    }),
-    password_dos: z.string().min(6, {
-        message: "La contraseña debe tener al menos 6 caracteres",
-    }),
-    institutional: z.string().min(2, {
-        message: "El nombre debe tener al menos 2 caracteres",
-    }),
-    name: z.string().min(2, {
-        message: "El nombre debe tener al menos 2 caracteres",
-    }),
-});
-```
-
-## Configuración
-
-Para una implementación completa, se requiere configurar:
-
-1. Variables de entorno para JWT_SECRET y HASH_SALT
-2. Configuración de MongoDB para almacenamiento de usuarios
-3. Configuración de NodeMailer para el envío de correos
-4. Variables de entorno para URLs de frontend (recuperación de contraseña)
-
-## Contribuir
-
-Si deseas contribuir al sistema de autenticación, por favor:
-
-1. Asegúrate de mantener las validaciones de seguridad existentes
-2. Escribe pruebas para cualquier nueva funcionalidad
-3. Sigue los estándares de código TypeScript actuales
-4. Documenta cualquier cambio en este README
+*Intercambia - Conectando comunidades a través del conocimiento compartido*
