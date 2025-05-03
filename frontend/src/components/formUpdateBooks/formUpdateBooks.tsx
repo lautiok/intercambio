@@ -19,7 +19,7 @@ export default function FormUpdateBooks() {
     formState: { errors },
     setValue,
   } = useForm<FormBook>();
-  const { updateBook, loading, getBooksById, booksById } = useBooks();
+  const { updateBook, loading, getBooksById, booksById, updateBookImage } = useBooks();
   const router = useRouter();
   const params = useParams();
   const { id } = params;
@@ -55,11 +55,39 @@ export default function FormUpdateBooks() {
     }
   });
 
+  const handleImageSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
+    event.preventDefault();
+    const formData = new FormData(event.currentTarget);
+    const imageFile = formData.get("image") as File
+    if (!imageFile) return;
+
+    try {
+      const res = await updateBookImage(`${id}`, imageFile);
+      if (res) {
+        router.push("/intercambio/books/users");
+      }
+    } catch (error) {
+      console.error("Error updating book image:", error);
+    } 
+  }
+
+
+
+
+
   return (
     <section className={style.formcreatebooks}>
       <header className={style.header}>
         <h2>Editar libro</h2>
       </header>
+      <div className={style.updateimage}>
+        <img src={booksById?.image.secure_url} alt={booksById?.title} />
+        <form onChange={handleImageSubmit} className={style.formImage}>
+          <label htmlFor="image">Actualizar imagen</label>
+          <input type="file" id="image" name="image" accept="image/*" />
+          <button type="submit">Subir imagen</button>
+        </form>
+      </div>
       <form className={style.form} onSubmit={handleSubmitForm}>
         <div className={style.formGroup}>
           <label htmlFor="title">Título</label>

@@ -7,6 +7,7 @@ import {
   getBooksPaginatedRequest,
   getBooksRequest,
   getBooksTokenRequest,
+  updateBookImageRequest,
   updateBookRequest,
 } from "@/api/booksApi";
 import {
@@ -71,6 +72,7 @@ export const BooksContext = createContext<{
   updateBook: (id: string, data: updateBook) => Promise<boolean>;
   booksPaginate: books[];
   setBooksPaginate: (books: books[]) => void;
+  updateBookImage: (id: string, image: File) => Promise<boolean>;
 }>({
   books: [],
   setBooks: () => {},
@@ -92,6 +94,7 @@ export const BooksContext = createContext<{
   updateBook: async () => Promise.resolve(false),
   booksPaginate: [],
   setBooksPaginate: () => {},
+  updateBookImage: async () => Promise.resolve(false),
 });
 
 export const BooksProvider = ({ children }: { children: ReactNode }) => {
@@ -101,6 +104,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
   const [booksToken, setBooksToken] = useState<books[]>([]);
   const [booksPaginate, setBooksPaginate] = useState<books[]>([]);
   const [loading, setLoading] = useState<boolean>(false);
+
 
   const createBook = async (book: newBook): Promise<boolean> => {
     try {
@@ -174,6 +178,19 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
     }
   };
 
+  const updateBookImage = async (id: string, image: File) => {
+    try {
+      setLoading(true);
+      const response = await updateBookImageRequest(id, image);
+      setLoading(false);
+      return response;
+    } catch (error) {
+      console.log("Error actualizando libro:", error);
+      setLoading(false);
+    }
+  };
+
+
 
 
   const deleteBook = async (id: string) => {
@@ -211,6 +228,7 @@ export const BooksProvider = ({ children }: { children: ReactNode }) => {
         getBooksPaginated,
         booksPaginate,
         setBooksPaginate,
+        updateBookImage,
       }}
     >
       {children}

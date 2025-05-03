@@ -13,6 +13,53 @@
     font-size: 1rem;
     color: #535353;
 }
+.updateimage {
+  display: flex;
+  align-items: center;
+  margin: 2rem auto;
+  max-width: 400px;
+  padding: 1.5rem;
+  gap: 1rem;
+}
+
+.updateimage img {
+  width:  100px;
+  height: auto;
+  border-radius: 12px;
+  margin-bottom: 1rem;
+  object-fit: cover;
+}
+
+.formImage {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.formImage label {
+  margin-bottom: 0.5rem;
+  font-weight: 500;
+  color: #333;
+}
+
+.formImage input[type="file"] {
+  margin-bottom: 1rem;
+}
+
+.formImage button {
+  padding: 0.75rem 1.5rem;
+  border: none;
+  border-radius: 8px;
+  background-color: #333;
+  color: #fff;
+  font-size: 1rem;
+  cursor: pointer;
+  transition: background-color 0.3s;
+}
+
+.formImage button:hover {
+  background-color: #555;
+}
 
 .form {
     max-width: 600px;

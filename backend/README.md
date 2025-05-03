@@ -15,6 +15,8 @@ Backend del proyecto Intercambia desarrollado con Express y TypeScript. Proporci
 - **Nodemailer**: Envío de correos electrónicos.
 - **Swagger**: Documentación API.
 - **Multer**: Gestión de carga de archivos (imágenes de libros).
+- **Socket.IO**: Comunicación en tiempo real para el chat.
+- **Cloudinary**: Almacenamiento en la nube para imágenes.
 
 ## Estructura del Proyecto
 
@@ -23,14 +25,20 @@ backend/
 ├── src/
 │   ├── app.ts                  # Punto de entrada de la aplicación
 │   ├── config/                 # Configuraciones (MongoDB, nodemailer, etc.)
+│   │   ├── cloudinary.ts       # Configuración de Cloudinary
+│   │   ├── socket.ts           # Configuración de Socket.IO
 │   ├── controllers/            # Controladores para las rutas
 │   │   ├── auth.controllers.ts # Controladores de autenticación
 │   │   ├── books.controllers.ts # Controladores de libros
+│   │   ├── chat.controllers.ts # Controladores de chat
+│   │   ├── exchange.controllers.ts # Controladores de intercambios
 │   │   ├── institucional.controllers.ts # Controladores de instituciones
 │   │   └── users.controllers.ts # Controladores de usuarios
 │   ├── middleware/             # Middleware personalizado
 │   ├── models/                 # Modelos de Mongoose
 │   │   ├── books.models.ts     # Modelo de libros
+│   │   ├── chat.models.ts      # Modelo de mensajes de chat
+│   │   ├── exchangeRequest.models.ts # Modelo de solicitudes de intercambio
 │   │   ├── institucional.models.ts # Modelo de instituciones
 │   │   ├── login.models.ts     # Modelo de registros de login
 │   │   └── users.models.ts     # Modelo de usuarios
@@ -71,6 +79,9 @@ backend/
    nodemailer_password=tu_contraseña
    BLOCK_TIME=60000
    UPLOAD_DIR=uploads/books
+   CLOUDINARY_CLOUD_NAME=tu_cloudinary_cloud_name
+   CLOUDINARY_API_KEY=tu_cloudinary_api_key
+   CLOUDINARY_API_SECRET=tu_cloudinary_api_secret
    ```
 
 4. Inicia la aplicación en modo desarrollo:
@@ -113,7 +124,7 @@ backend/
 
 #### Características
 - Registro de nuevos libros con información detallada
-- Carga de imágenes de libros
+- Carga de imágenes de libros con Cloudinary
 - Categorización por asignatura, curso o categoría
 - Sistema de estados (disponible, pendiente, intercambiado)
 - Búsqueda y filtrado avanzado
@@ -152,7 +163,26 @@ backend/
 | `/exchange/user` | GET | Obtener intercambios del usuario | Sesión |
 | `/exchange/:id` | GET | Obtener detalles de intercambio | Sesión, Participante |
 
-### 4. Gestión de Instituciones
+### 4. Sistema de Chat en Tiempo Real
+
+#### Características
+- Chat entre usuarios interesados en intercambios
+- Mensajería en tiempo real con Socket.IO
+- Historial de conversaciones
+- Notificaciones de nuevos mensajes
+
+#### Endpoints y Eventos de Socket
+
+| Ruta/Evento | Método/Tipo | Descripción | Middleware |
+|-------------|-------------|-------------|------------|
+| `/chat/conversations` | GET | Obtener conversaciones del usuario | Sesión |
+| `/chat/messages/:conversationId` | GET | Obtener mensajes de una conversación | Sesión, Participante |
+| `message:send` | Socket | Enviar mensaje | Autenticación Socket |
+| `message:received` | Socket | Notificación de mensaje recibido | - |
+| `user:typing` | Socket | Indicador de usuario escribiendo | - |
+| `chat:join` | Socket | Unirse a una sala de chat | - |
+
+### 5. Gestión de Instituciones
 
 #### Características
 - Registro de instituciones educativas
@@ -171,7 +201,7 @@ backend/
 | `/institucional/domains` | GET | Listar dominios autorizados | - |
 | `/institucional/stats/:id` | GET | Estadísticas de institución | Sesión, Rol Admin |
 
-### 5. Gestión de Usuarios
+### 6. Gestión de Usuarios
 
 #### Características
 - Perfiles de usuario
@@ -242,7 +272,27 @@ checkOwnership("bookId")
 
 ## Gestión de Archivos
 
-Para la carga de imágenes de libros, se utiliza Multer:
+### Cloudinary
+
+Para almacenamiento de imágenes en la nube:
+
+```typescript
+// Configuración de Cloudinary
+cloudinary.config({
+  cloud_name: process.env.CLOUDINARY_CLOUD_NAME,
+  api_key: process.env.CLOUDINARY_API_KEY,
+  api_secret: process.env.CLOUDINARY_API_SECRET
+});
+
+// Ejemplo de uso para subir imágenes
+const uploadImage = async (filePath: string) => {
+  return await cloudinary.uploader.upload(filePath, {
+    folder: 'intercambia/books'
+  });
+};
+```
+
+### Multer (Temporal antes de subir a Cloudinary)
 
 ```typescript
 // Configuración de Multer
@@ -278,6 +328,63 @@ const upload = multer({
 router.post('/books/upload', checkSession, upload.single('image'), uploadBookImage);
 ```
 
+## Integración con Socket.IO
+
+Para la funcionalidad de chat en tiempo real:
+
+```typescript
+// Configuración básica de Socket.IO
+const io = new Server(httpServer, {
+  cors: {
+    origin: process.env.FRONTEND_URL || "http://localhost:3000",
+    methods: ["GET", "POST"],
+    credentials: true
+  }
+});
+
+// Autenticación de socket
+io.use((socket, next) => {
+  const token = socket.handshake.auth.token;
+  // Validar token JWT
+  if (token && verificarToken(token)) {
+    next();
+  } else {
+    next(new Error("Autenticación fallida"));
+  }
+});
+
+// Gestión de eventos
+io.on("connection", (socket) => {
+  // Unirse a una sala de chat
+  socket.on("chat:join", (conversationId) => {
+    socket.join(conversationId);
+  });
+  
+  // Enviar mensaje
+  socket.on("message:send", async (data) => {
+    // Guardar mensaje en la base de datos
+    const mensaje = await chatService.saveMessage(data);
+    
+    // Emitir mensaje a todos los usuarios en la sala
+    io.to(data.conversationId).emit("message:received", mensaje);
+  });
+  
+  // Usuario escribiendo
+  socket.on("user:typing", (data) => {
+    socket.to(data.conversationId).emit("user:typing", {
+      userId: data.userId,
+      username: data.username,
+      isTyping: data.isTyping
+    });
+  });
+  
+  // Desconexión
+  socket.on("disconnect", () => {
+    // Limpiar estado
+  });
+});
+```
+
 ## Seguridad
 
 - Contraseñas hasheadas con bcrypt
@@ -288,6 +395,7 @@ router.post('/books/upload', checkSession, upload.single('image'), uploadBookIma
 - Sanitización de entradas para prevenir inyecciones
 - Rate limiting para prevenir abusos
 - Validación de dominios de correo institucionales
+- Autenticación para conexiones WebSocket
 
 ## Documentación API
 
@@ -316,6 +424,8 @@ La API está documentada con Swagger y disponible en la ruta `/api-docs` cuando 
 - **zod**: Validación de esquemas
 - **nodemailer**: Envío de correos electrónicos
 - **multer**: Gestión de carga de archivos
+- **cloudinary**: Almacenamiento de imágenes en la nube
+- **socket.io**: Comunicación en tiempo real
 - **swagger-jsdoc/swagger-ui-express**: Documentación API
 - **cors**: Configuración de CORS para seguridad
 - **helmet**: Protección con cabeceras HTTP

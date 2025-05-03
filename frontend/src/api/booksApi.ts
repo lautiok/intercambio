@@ -50,6 +50,19 @@ export const updateBookRequest = async (id : string, data: updateBook) => {
     return response.data;
 };
 
+export const updateBookImageRequest = async (id: string, image: File) => {
+    const formData = new FormData();
+    formData.append("image", image);
+
+    const response = await axios.put(`books/image/${id}`, formData, {
+        headers: {
+            "Content-Type": "multipart/form-data",
+        },
+    });
+
+    return response.data;
+};
+
 export const delateBookRequest = async (id: string) => {
     const response = await axios.delete(`books/${id}`);
     return response.data;

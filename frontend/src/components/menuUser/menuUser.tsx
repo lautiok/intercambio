@@ -1,14 +1,18 @@
 "use client";
 import { useState } from "react";
 import style from "./menuuser.module.css";
-import { User } from "lucide-react";
+import { ArrowRightLeft, User } from "lucide-react";
 import { useAuth } from "@/context/authContext";
+import Link from "next/link";
 
 export default function MenuUser() {
     const [showMenu, setShowMenu] = useState<boolean>(false);
     const {logout, user} = useAuth();
   return (
     <div className={style.menu}>
+        <Link href="/intercambio/exchange">
+            <ArrowRightLeft size={30} />
+        </Link>
         <button className={style.button} onClick={() => setShowMenu(!showMenu)}>
         <User size={30} />
         </button>

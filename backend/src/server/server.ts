@@ -11,6 +11,8 @@ import specs from '../config/swaggerConfig';
 import { ckeckSession } from '../middleware/sessionMiddleware';
 import { checkRole } from '../middleware/rolesMiddleware';
 import { config } from '../config/config';
+import exchange from '../routes/v1/exchange.route';
+import chat from '../routes/v1/chat.routes';
 const app: express.Application = express();
 
 app.use(express.json());
@@ -28,6 +30,8 @@ app.use("/api/v1/institucional" , InstitutionalRoutes);
 app.use("/api/v1/books", ckeckSession, booksRoutes);
 app.use("/api/v1/documents", swaggerUI.serve, swaggerUI.setup(specs)) 
 app.use("/api/v1/auth", AuthRoutes); 
+app.use ("/api/v1/exchange", ckeckSession, exchange);
+app.use("/api/v1/chat", ckeckSession, chat);
 
 
 export default app;

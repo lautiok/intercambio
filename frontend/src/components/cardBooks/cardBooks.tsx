@@ -12,7 +12,7 @@ export default function CardBooks({ image, title, id }: CardBooksProps) {
       <article className={style.card}>
         <img src={image} alt={title} />
         <h2>{title}</h2>
-        <Link href={`/book/${id}`}>intercambiar</Link>
+        <Link href={`intercambio/books/${id}`}>intercambiar</Link>
       </article>
     );
   }
