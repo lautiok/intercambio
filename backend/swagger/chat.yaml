@@ -1,0 +1,104 @@
+openapi: 3.0.0
+info:
+  title: Chat API
+  description: API para la gestión de chats entre usuarios para coordinar intercambios de libros.
+  version: 1.0.0
+paths:
+  /api/v1/chat/{chatId}/messages:
+    get:
+      summary: Obtener mensajes de un chat
+      tags:
+        - Chat
+      description: Obtiene todos los mensajes de un chat específico.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: chatId
+          in: path
+          required: true
+          description: ID del chat
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Mensajes obtenidos con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/Message'
+              example:
+                - sender: "60d5a8c3e3b16a001f5b1c89"
+                  content: "Hola, estoy interesado en tu libro"
+                - sender: "60d5a8d5e3b16a001f5b1c8a"
+                  content: "Claro, podemos hacer el intercambio"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al obtener mensajes"
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+  schemas:
+    Message:
+      type: object
+      properties:
+        sender:
+          type: string
+          description: ID del usuario que envía el mensaje
+        content:
+          type: string
+          description: Contenido del mensaje
+        timestamp:
+          type: string
+          format: date-time
+          description: Fecha y hora en que se envió el mensaje
+      required:
+        - sender
+        - content
+    
+    Chat:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del chat
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              user:
+                type: string
+                description: ID del usuario participante
+          description: Lista de usuarios participantes en el chat
+        exchange:
+          type: string
+          description: ID de la solicitud de intercambio relacionada con este chat
+        messages:
+          type: array
+          items:
+            $ref: '#/components/schemas/Message'
+          description: Lista de mensajes en el chat
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del chat
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización del chat
+      required:
+        - participants
+        - exchange

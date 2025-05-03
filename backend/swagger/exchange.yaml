@@ -1,0 +1,360 @@
+openapi: 3.0.0
+info:
+  title: Exchange API
+  description: API para la gestión de solicitudes de intercambio de libros entre usuarios.
+  version: 1.0.0
+paths:
+  /api/v1/exchange:
+    post:
+      summary: Crear una solicitud de intercambio
+      tags:
+        - Exchange
+      description: Crea una nueva solicitud de intercambio de libros entre usuarios.
+      security:
+        - cookieAuth: []
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              type: object
+              properties:
+                requestedBook:
+                  type: string
+                  description: ID del libro solicitado
+                  example: "60d5a8c3e3b16a001f5b1c89"
+                offeredBook:
+                  type: string
+                  description: ID del libro ofrecido
+                  example: "60d5a8d5e3b16a001f5b1c8a"
+                owner:
+                  type: string
+                  description: ID del propietario del libro solicitado
+                  example: "60d5a8c3e3b16a001f5b1c89"
+              required:
+                - requestedBook
+                - offeredBook
+                - owner
+      responses:
+        '200':
+          description: Solicitud de intercambio creada con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRequest'
+        '400':
+          description: Datos faltantes o inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Faltan campos"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al crear la solicitud de intercambio"
+
+  /api/v1/exchange/requester:
+    get:
+      summary: Obtener solicitudes de intercambio hechas por el usuario
+      tags:
+        - Exchange
+      description: Devuelve todas las solicitudes de intercambio realizadas por el usuario autenticado.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Solicitudes de intercambio obtenidas con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExchangeRequest'
+        '400':
+          description: Error en el token o datos inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "hubo un error en el token para encontrar la solicitud"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al encontrar la solicitud de intercambio"
+
+  /api/v1/exchange/owner:
+    get:
+      summary: Obtener solicitudes de intercambio recibidas por el usuario
+      tags:
+        - Exchange
+      description: Devuelve todas las solicitudes de intercambio que han sido recibidas por el usuario autenticado.
+      security:
+        - cookieAuth: []
+      responses:
+        '200':
+          description: Solicitudes de intercambio obtenidas con éxito
+          content:
+            application/json:
+              schema:
+                type: array
+                items:
+                  $ref: '#/components/schemas/ExchangeRequest'
+        '400':
+          description: Error en el token o datos inválidos
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "hubo un error en el token para encontrar la solicitud"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al encontrar la solicitud de intercambio"
+
+  /api/v1/exchange/{id}/accept:
+    put:
+      summary: Aceptar una solicitud de intercambio
+      tags:
+        - Exchange
+      description: Acepta una solicitud de intercambio específica y crea un chat entre los participantes.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la solicitud de intercambio
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Solicitud de intercambio aceptada con éxito y chat creado
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/Chat'
+        '404':
+          description: Solicitud de intercambio no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Solicitud de intercambio no encontrada"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al aceptar la solicitud de intercambio"
+
+  /api/v1/exchange/{id}:
+    delete:
+      summary: Eliminar una solicitud de intercambio
+      tags:
+        - Exchange
+      description: Elimina una solicitud de intercambio específica.
+      security:
+        - cookieAuth: []
+      parameters:
+        - name: id
+          in: path
+          required: true
+          description: ID de la solicitud de intercambio
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Solicitud de intercambio eliminada con éxito
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/ExchangeRequest'
+        '404':
+          description: Solicitud de intercambio no encontrada
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Solicitud de intercambio no encontrada"
+        '500':
+          description: Error del servidor
+          content:
+            application/json:
+              schema:
+                type: object
+                properties:
+                  message:
+                    type: string
+                    example: "Error al eliminar la solicitud de intercambio"
+
+components:
+  securitySchemes:
+    cookieAuth:
+      type: apiKey
+      in: cookie
+      name: access_token
+  schemas:
+    Book:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del libro
+        title:
+          type: string
+          description: Título del libro
+        author:
+          type: string
+          description: Autor del libro
+        description:
+          type: string
+          description: Descripción del libro
+        owner:
+          type: string
+          description: ID del propietario del libro
+      required:
+        - title
+        - author
+        - owner
+    
+    User:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del usuario
+        name:
+          type: string
+          description: Nombre completo del usuario
+        email:
+          type: string
+          format: email
+          description: Correo electrónico del usuario
+        role:
+          type: string
+          enum: [user, admin]
+          description: Rol del usuario en el sistema
+        institutional:
+          type: string
+          description: ID de la institución a la que pertenece el usuario
+      required:
+        - name
+        - email
+        - role
+    
+    Chat:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único del chat
+        participants:
+          type: array
+          items:
+            type: object
+            properties:
+              user:
+                type: string
+                description: ID del usuario participante
+        exchange:
+          type: string
+          description: ID de la solicitud de intercambio relacionada
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación del chat
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización del chat
+      required:
+        - participants
+        - exchange
+    
+    ExchangeRequest:
+      type: object
+      properties:
+        _id:
+          type: string
+          description: Identificador único de la solicitud de intercambio
+        requestedBook:
+          oneOf:
+            - type: string
+              description: ID del libro solicitado
+            - $ref: '#/components/schemas/Book'
+        offeredBook:
+          oneOf:
+            - type: string
+              description: ID del libro ofrecido
+            - $ref: '#/components/schemas/Book'
+        idChat:
+          oneOf:
+            - type: string
+              description: ID del chat asociado
+            - $ref: '#/components/schemas/Chat'
+        requester:
+          oneOf:
+            - type: string
+              description: ID del usuario que solicita el intercambio
+            - $ref: '#/components/schemas/User'
+        owner:
+          oneOf:
+            - type: string
+              description: ID del propietario del libro solicitado
+            - $ref: '#/components/schemas/User'
+        status:
+          type: string
+          enum: [pending, accepted, rejected, completed]
+          description: Estado actual de la solicitud de intercambio
+          default: pending
+        createdAt:
+          type: string
+          format: date-time
+          description: Fecha de creación de la solicitud de intercambio
+        updatedAt:
+          type: string
+          format: date-time
+          description: Fecha de última actualización de la solicitud de intercambio
+      required:
+        - requestedBook
+        - offeredBook
+        - requester
+        - owner
